@@ -1,0 +1,99 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+{% block title %} {% if project %} Edit {% else %} Create {% endif %} Customer {% endblock title %}
+{% block extrastyle %}
+    <!-- Tempusdominus Bootstrap 4 -->
+    <link rel="stylesheet"
+          href="{% static 'plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css' %}">
+{% endblock extrastyle %}
+{% block bodyclass %} hold-transition sidebar-mini {% endblock bodyclass %}
+{% block content %}
+    <!-- Content Wrapper. Contains page content -->
+    <div class="content-wrapper">
+        <!-- Content Header (Page header) -->
+        <section class="content-header">
+            <div class="container-fluid">
+                <div class="row mb-2">
+                    <div class="col-md-12">
+                        <ol class="breadcrumb float-sm-right">
+                            <a href="{% url 'accounts:customers_list' %}" class="btn btn-secondary">Back to Customers
+                                List</a>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Main content -->
+        <section class="content">
+            <form method="post">
+                {% csrf_token %}
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="card card-primary">
+
+                            <div class="card-body">
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <input type="hidden" id="customer_id" name="customer_id"
+                                               value="{{ customer_id }}">
+                                        {{ form.name.label_tag }}
+                                        {{ form.name }}
+                                    </div>
+                                    <div class="col-md-3">
+                                        {{ form.code.label_tag }}
+                                        {{ form.code }}
+                                    </div>
+
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-3">
+                                        {{ form.user_email.label_tag }}
+                                        {{ form.user_email }}
+                                    </div>
+                                    <div class="col-md-3">
+                                        {{ form.password.label_tag }}
+                                        {{ form.password }}
+                                    </div>
+                                    <div class="col-md-3">
+                                        {{ form.confirm_password.label_tag }}
+                                        {{ form.confirm_password }}
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label for="saveBtn">&nbsp;</label>
+                                        {% if customer_id %}
+                                            <input type="submit" value="Update Customer"
+                                                   class="btn btn-warning form-control">
+                                        {% else %}  <input type="submit" value="Save Customer"
+                                                           class="btn btn-primary form-control"> {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- /.card-body -->
+                        </div>
+                        <!-- /.card -->
+                    </div>
+                </div>
+
+            </form>
+            {% if form.errors %}
+                <div class="errors">
+                    {{ form.errors }}
+                </div>
+            {% endif %}
+
+            {% if messages %}
+                <ul class="messages">
+                    {% for message in messages %}
+                        <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </section>
+        <!-- /.content -->
+    </div>
+{% endblock content %}
+{% block extra_scripts %}
+    <!-- Tempusdominus Bootstrap 4 -->
+    <script src="{% static 'plugins/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js' %}"></script>
+{% endblock extra_scripts %}

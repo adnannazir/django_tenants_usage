@@ -1,0 +1,230 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block title %} Dashboard {% endblock title %}
+
+{% block extrastyle %}
+
+    <!-- Select2 -->
+    <link rel="stylesheet" href="{% static 'plugins/select2/css/select2.min.css' %}">
+    <link rel="stylesheet" href="{% static 'plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css' %}">
+
+{% endblock extrastyle %}
+
+{% block bodyclass %} hold-transition sidebar-mini layout-fixed {% endblock bodyclass %}
+
+{% block content %}
+    <!-- Content Wrapper. Contains page content -->
+    <div class="content-wrapper">
+        <!-- Content Header (Page header) -->
+        <div class="content-header">
+            <div class="container-fluid">
+                <div class="row">
+
+                    <div class="col-lg-3 col-12 mb-2">
+                        {% if customers is not True %}
+                            <select id="customer" class="form-control select2bs4" style="width: 100%;" name="customer">
+                                <option value="" selected>- Select a Customer -</option>
+                                {% for customer in customers %}
+                                    <option value="{{ cusotmer.id }}">{{ customer.name }}</option>
+                                {% endfor %}
+                            </select>
+                        {% endif %}
+                    </div>
+
+                </div><!-- /.row -->
+            </div><!-- /.container-fluid -->
+        </div>
+        <!-- /.content-header -->
+
+        <!-- Main content -->
+        <section class="content">
+            <div class="container-fluid">
+                <!-- Small boxes (Stat box) -->
+
+                <div class="row">
+                    <div class="col-lg-3 col-6">
+                        <!-- small box -->
+                        <div class="small-box bg-gradient-blue">
+                            <div class="inner">
+                                <h3>xX</h3>
+
+                                <h5>Customers</h5>
+                            </div>
+                            <div class="icon">
+                                <i class="fa fa-tasks"></i>
+                            </div>
+                            <a href="{% url 'accounts:customers_list' %}" class="small-box-footer">More info <i
+                                    class="fas fa-arrow-circle-right"></i></a>
+                        </div>
+                    </div>
+                    <!-- ./col -->
+                    <div class="col-lg-3 col-6">
+                        <!-- small box -->
+                        <div class="small-box bg-success">
+                            <div class="inner">
+                                <h3>44</h3>
+
+                                <h5>Companies</h5>
+                            </div>
+                            <div class="icon">
+                                <i class="fa fa-desktop"></i>
+                            </div>
+                            <a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+                        </div>
+                    </div>
+                    <!-- ./col -->
+                    <div class="col-lg-3 col-6">
+                        <!-- small box -->
+                        <div class="small-box bg-gradient-maroon">
+                            <div class="inner">
+                                <h3>53</h3>
+
+                                <h5>Employees</h5>
+                            </div>
+                            <div class="icon">
+                                <i class="fa fa-charging-station"></i>
+                            </div>
+                            <a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+                        </div>
+                    </div>
+
+                    <!-- ./col -->
+                    <div class="col-lg-3 col-6">
+                        <div class="small-box bg-info">
+                            <div class="inner">
+                                <h3>53</h3>
+                                <h5>Scheduled Shifts</h5>
+                            </div>
+                            <div class="icon">
+                                <i class="fa fa-folder"></i>
+                            </div>
+                            <a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+                        </div>
+                    </div>
+                    <!-- ./col -->
+                </div>
+                <!-- Main row -->
+                <!-- /.row (main row) -->
+                <div class="row">
+
+                    <div class="col-lg-6 col-12">
+                        <!-- FS CHART -->
+                        <div class="card card-danger">
+
+                            <div class="card-body">
+                                <canvas id="fsChart"
+                                        style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
+                            </div>
+                            <!-- /.card-body -->
+                        </div>
+                        <!-- /.card -->
+                    </div>
+                    <div class="col-lg-6 col-12">
+                        <!-- AREA CHART -->
+                        <!-- BAR CHART -->
+                        <div class="card card-success">
+
+                            <div class="card-body">
+                                <div class="chart">
+                                    <canvas id="barChart"
+                                            style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
+                                </div>
+                            </div>
+                            <!-- /.card-body -->
+                        </div>
+                        <!-- /.card -->
+                        <!-- /.card -->
+                    </div>
+                </div>
+            </div>
+        </section><!-- /.container-fluid -->
+        <!-- /.content -->
+    </div>
+{% endblock content %}
+
+{% block extra_scripts %}
+
+    <!-- jQuery UI 1.11.4 -->
+    <script src="{% static 'plugins/jquery-ui/jquery-ui.min.js' %}"></script>
+    <!-- Resolve conflict in jQuery UI tooltip with Bootstrap tooltip -->
+    <script>
+        $.widget.bridge('uibutton', $.ui.button)
+    </script>
+    <!-- Select2 -->
+    <script src="{% static 'plugins/select2/js/select2.full.min.js' %}"></script>
+    <!-- ChartJS -->
+    <script src="{% static 'plugins/chart.js/Chart.min.js' %}"></script>
+    <!-- overlayScrollbars -->
+    <script src="{% static 'plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js' %}"></script>
+
+    <script>
+        $(function () {
+                //Initialize Select2 Elements
+                $('.select2bs4').select2({
+                    theme: 'bootstrap4'
+                });
+
+// AJAX call to retrieve project counts by OBS
+                $.ajax({
+                    url: 'charts/project_counts_by_fs', // Update with your API endpoint to retrieve project counts by OBS
+                    method: 'GET',
+                    success: function (response) {
+                        // Update the fs chart data
+                        updateFSChartData(response);
+
+                        // Render or update the pie chart
+                        var fsChartCanvas = $('#fsChart').get(0).getContext('2d');
+                        new Chart(fsChartCanvas, {
+                            type: 'pie',
+                            data: fsData,
+                            options: fsOptions
+                        });
+                    },
+                    error: function (error) {
+                        console.log('Error:', error);
+                    }
+                });
+
+
+                var RAG_chart_data = {
+                    labels: ['Green', 'Yellow', 'Red'],
+                    datasets: [
+                        {
+                            label: 'RAG Status',
+                            backgroundColor: ['rgba(0,255,0,1)', 'rgba(255,200,0,1)', 'rgba(255,0,0,1)'],
+                            borderColor: ['rgba(255,255,255,0.8)', 'rgba(255,255,255,0.8)', 'rgba(255,255,255,0.8)'],
+                            borderWidth: 2,
+                            data: [{{ green_count }}, {{ yellow_count }}, {{ red_count }}]
+                        }
+                    ]
+                };
+                //-------------
+                //- BAR CHART -
+                //-------------
+                var barChartCanvas = $('#barChart').get(0).getContext('2d')
+                var barChartData = $.extend(true, {}, RAG_chart_data)
+
+                var barChartOptions = {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        yAxes: [{
+                            ticks: {
+                                beginAtZero: true,
+                                stepSize: 10  // Adjust the step size as needed
+                            }
+                        }]
+                    }
+                };
+
+                new Chart(barChartCanvas, {
+                    type: 'bar',
+                    data: barChartData,
+                    options: barChartOptions
+                })
+            }
+        )
+        ;
+    </script>
+{% endblock extra_scripts %}
